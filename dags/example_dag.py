@@ -13,7 +13,7 @@ default_args = {
 with DAG(
     dag_id='example_postgres_dag',
     default_args=default_args,
-    schedule_interval=None,
+    schedule='@daily',
     catchup=False,
 ) as dag:
 

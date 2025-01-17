@@ -21,7 +21,13 @@ Dieses Projekt zeigt die Orchestrierung eines einfachen Workflows mit Apache Air
 ```bash
 pip install -r requirements.txt
 airflow db init
-airflow users create --username admin --firstname admin --lastname admin --role Admin --email
+airflow users create \
+    --username admin \
+    --firstname admin \
+    --lastname admin \
+    --role Admin \
+    --email admin@example.com
+
 ```
 
 2. **PostgreSQL installieren**:
@@ -46,5 +52,5 @@ airflow scheduler
 Überprüfen Sie die Ergebnisse, indem Sie die Daten in der PostgreSQL-Datenbank abfragen:
 
 ```bash
-psql -U postgres -d airflow -c "SELECT * FROM example_table;"
+psql -U karaca -d airflow_db -c "SELECT * FROM example_table;"
 ```
