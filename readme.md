@@ -1,7 +1,7 @@
 # Orchestrierung mittels Apache Airflow
 
 ## Github Repository
-Das Projekt ist auf Github verfügbar unter: [https://github.com/Mehmet1700/orchestration-airflow-project ](
+Das Projekt ist auf Github verfügbar unter: https://github.com/Mehmet1700/orchestration-airflow-project
 
 ## Projektbeschreibung
 Dieses Projekt demonstriert die Orchestrierung eines einfachen Workflows mit Apache Airflow, der SQL-Skripte in einer PostgreSQL-Datenbank ausführt. Dabei wird gezeigt, wie Airflow als Workflow-Orchestrierungstool genutzt werden kann, um Datenpipelines effizient zu verwalten und zu automatisieren.
@@ -63,7 +63,7 @@ psql -U postgres -f scripts/setup_postgres.sql
 Das Projekt verwendet postgresql, aber kann auch mit anderen Datenbanken wie MySQL oder SQLite verwendet werden. Die Konfiguration kann in der `airflow.cfg` Datei geändert werden.
 
 ### 5. Docker-Container starten (optional)
-Falls Sie Docker verwenden, starten Sie die Container mit Docker Compose:
+Falls Sie Docker verwenden, starten Sie die Container mit Docker Compose (Docker sollte bereits laufen):
 ```bash
 docker-compose up -d
 ```
