@@ -1,43 +1,44 @@
-version: '3.8'
+version: '3.8'  # Die Version des Docker-Compose-Formats, die verwendet wird.
 
 services:
   postgres:
-    image: postgres:13
+    image: postgres:13  # Das verwendete PostgreSQL-Image in Version 13.
     environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
+      POSTGRES_USER: airflow  # Benutzername für die PostgreSQL-Datenbank.
+      POSTGRES_PASSWORD: airflow  # Passwort für den Benutzer.
+      POSTGRES_DB: airflow  # Name der Datenbank, die erstellt wird.
     volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "airflow"]
-      interval: 10s
-      retries: 5
-      start_period: 5s
+      - postgres-data:/var/lib/postgresql/data  # Persistente Speicherung der Datenbankdaten auf dem Host.
+    healthcheck:  # Überprüft, ob der PostgreSQL-Dienst bereit ist.
+      test: ["CMD", "pg_isready", "-U", "airflow"]  # Führt den Befehl "pg_isready" aus, um den Status zu prüfen.
+      interval: 10s  # Intervall zwischen den Prüfungen.
+      retries: 5  # Anzahl der Wiederholungen bei Fehlern.
+      start_period: 5s  # Wartezeit vor Start der ersten Prüfung.
 
   airflow-init:
-    image: apache/airflow:2.7.2
+    image: apache/airflow:2.7.2  # Das verwendete Apache Airflow-Image in Version 2.7.2.
     depends_on:
       postgres:
-        condition: service_healthy
+        condition: service_healthy  # Wartet, bis der PostgreSQL-Dienst als "gesund" markiert ist.
     environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CORE__FERNET_KEY: tyRE8Zns5ZLh3uYN8F8CsBlEKLZJVOuH8wnY1zCLKv8=
-      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
-      AIRFLOW_CONN_POSTGRES_DEFAULT: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
-      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor  # Legt den Executor-Typ fest (hier LocalExecutor).
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow  # Verbindungs-URL für die Datenbank.
+      AIRFLOW__CORE__FERNET_KEY: tyRE8Zns5ZLh3uYN8F8CsBlEKLZJVOuH8wnY1zCLKv8=  # Schlüssel zur Verschlüsselung sensibler Daten in Airflow.
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'  # Verhindert das Laden von Beispiel-DAGs.
+      AIRFLOW_CONN_POSTGRES_DEFAULT: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow  # Standardverbindung für PostgreSQL in Airflow.
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags  # Ordner für DAG-Dateien in Airflow.
     volumes:
-      - ./scripts:/docker-entrypoint-initdb.d  # Mount für Setup-Skripte in den Container
-      - ./dags:/opt/airflow/dags  # Mount für DAGs
-      - ./dags/sql:/opt/airflow/include/sql  # Mount für SQL-Skripte
+      - ./scripts:/docker-entrypoint-initdb.d  # Mount für Setup-Skripte, die beim Start ausgeführt werden.
+      - ./dags:/opt/airflow/dags  # Mount für DAG-Dateien (Workflows).
+      - ./dags/sql:/opt/airflow/include/sql  # Mount für SQL-Skripte, die von DAGs verwendet werden können.
 
-    entrypoint: >
+    entrypoint: >  
       /bin/bash -c "
-      airflow db migrate &&
-      airflow users create -u admin -f Admin -l User -r Admin -e admin@example.com -p admin ||
+      airflow db migrate &&  
+      airflow users create -u admin -f Admin -l User -r Admin -e admin@example.com -p admin ||  
       echo 'Admin user already exists.'
-      "
+      "  
+      # Führt Datenbank-Migrationen durch und erstellt einen Admin-Benutzer, falls dieser noch nicht existiert.
 
   airflow-webserver:
     image: apache/airflow:2.7.2
@@ -46,19 +47,20 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
+        # Wartet darauf, dass sowohl PostgreSQL gesund ist als auch der Initialisierungsdienst erfolgreich abgeschlossen wurde.
     ports:
-      - "8080:8080"
+      - "8080:8080"  # Exponiert den Webserver von Airflow auf Port 8080 des Hosts.
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__FERNET_KEY: tyRE8Zns5ZLh3uYN8F8CsBlEKLZJVOuH8wnY1zCLKv8=
       AIRFLOW_CONN_POSTGRES_DEFAULT: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
-      AIRFLOW__CORE__EXPOSE_CONFIG: "True"
+      AIRFLOW__CORE__EXPOSE_CONFIG: "True"  # Ermöglicht das Anzeigen der Konfiguration im UI (nur zu Debugging-Zwecken empfohlen).
 
     volumes:
-      - ./dags:/opt/airflow/dags  # Mount für DAGs
-      - ./dags/sql:/opt/airflow/include/sql  # Mount für SQL-Skripte
-    command: ["webserver"]
+      - ./dags:/opt/airflow/dags
+      - ./dags/sql:/opt/airflow/include/sql
+    command: ["webserver"]  # Startet den Webserver-Prozess von Airflow.
 
   airflow-scheduler:
     image: apache/airflow:2.7.2
@@ -67,6 +69,7 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
+        # Wartet darauf, dass sowohl PostgreSQL gesund ist als auch der Initialisierungsdienst erfolgreich abgeschlossen wurde.
     environment:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
@@ -75,9 +78,10 @@ services:
       AIRFLOW__CORE__EXPOSE_CONFIG: "True"
 
     volumes:
-      - ./dags:/opt/airflow/dags  # Mount für DAGs
-      - ./dags/sql:/opt/airflow/include/sql  # Mount für SQL-Skripte
-    command: ["scheduler"]
+      - ./dags:/opt/airflow/dags
+      - ./dags/sql:/opt/airflow/include/sql
+    command: ["scheduler"]  # Startet den Scheduler-Prozess von Airflow.
 
 volumes:
   postgres-data:
+    # Ein benannter Volume zur persistenten Speicherung der PostgreSQL-Datenbankdaten.
