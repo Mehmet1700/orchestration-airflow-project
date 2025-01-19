@@ -5,7 +5,7 @@ from datetime import datetime
 # Standardargumente für den DAG
 default_args = {
     'owner': 'airflow',  # Besitzer des DAGs
-    'start_date': datetime(2025, 1, 18),  # Startdatum des DAGs
+    'start_date': datetime(2025, 1, 8),  # Startdatum des DAGs
     'retries': 1,  # Anzahl der Wiederholungsversuche bei Fehlern
 }
 
